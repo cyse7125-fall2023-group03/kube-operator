@@ -1,0 +1,27 @@
+# permissions for end users to view healthchecks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: healthcheck-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: oper
+    app.kubernetes.io/part-of: oper
+    app.kubernetes.io/managed-by: kustomize
+  name: healthcheck-viewer-role
+rules:
+- apiGroups:
+  - webapp.udaykk.me
+  resources:
+  - healthchecks
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - webapp.udaykk.me
+  resources:
+  - healthchecks/status
+  verbs:
+  - get
