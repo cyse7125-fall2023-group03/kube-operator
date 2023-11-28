@@ -119,7 +119,7 @@ func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 									Args: []string{
 										"curl",
 										"--location",
-										"http://localhost:8082/api/v1/kafka/publish", // Update with your API endpoint
+										"` + healthCheck.Spec.URI + `", // Update with your API endpoint
 										"--header",
 										"Content-Type: application/json",
 										"--data",
