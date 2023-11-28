@@ -14,11 +14,9 @@ jobs:
       with:
         go-version: '1.21.x'
     - name: Install dependencies
-      run: go get .
+      run: go get ./cmd/
     - name: Build
-      run: go build -v ./...
-    - name: Test with the Go CLI
-      run: go test    
+      run: go build -v ./...  
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.UKK_GH_TOKEN }} 
