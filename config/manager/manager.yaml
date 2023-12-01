@@ -101,4 +101,4 @@ spec:
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
-        - name: pull-secret-oper-system
+        - name: ctrl-oper-system

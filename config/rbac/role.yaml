@@ -30,3 +30,21 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - webapp.udaykk.me
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  - configmaps
+  - secrets
+  verbs:
+  - '*'
