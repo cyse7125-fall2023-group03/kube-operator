@@ -37,6 +37,7 @@ pipeline {
             withCredentials([usernamePassword(credentialsId: QUAY_IO_CREDENTIALS, passwordVariable: 'QUAY_IO_PASSWORD', usernameVariable: 'QUAY_IO_USERNAME')]) {
                 script {
                         sh "docker login -u $QUAY_IO_USERNAME -p $QUAY_IO_PASSWORD ${env.QUAY_IO_REGISTRY}"
+                        sh "make docker-build docker-push IMG=quay.io/csye7125group3/controller:${latestVersion}"
                         sh "make docker-build docker-push IMG=quay.io/csye7125group3/controller:latest"
                     }
                 }
