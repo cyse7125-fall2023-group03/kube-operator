@@ -18,6 +18,8 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"strconv"
 
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
@@ -99,6 +101,27 @@ func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	log.Info("Reconciling HealthCheck", "Name", healthCheck.Name)
 	log.Info("specs", "spec", healthCheck.Spec)
 
+	payload := map[string]interface{}{
+		"name":                      healthCheck.Spec.Name,
+		"uri":                       healthCheck.Spec.URI + "/api/v1/kafka/publish",
+		"is_paused":                 healthCheck.Spec.IsPaused,
+		"num_retries":               healthCheck.Spec.NumRetries,
+		"uptime_sla":                healthCheck.Spec.UptimeSLA,
+		"response_time_sla":         healthCheck.Spec.ResponseTimeSLA,
+		"use_ssl":                   healthCheck.Spec.UseSSL,
+		"response_status_code":      healthCheck.Spec.ResponseStatusCode,
+		"check_interval_in_seconds": healthCheck.Spec.CheckIntervalInSeconds,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println("Error creating JSON:", err)
+		return ctrl.Result{}, err
+	}
+
+	// Convert JSON data to string
+	jsonString := string(jsonData)
+
 	// Build the CronJob based on HealthCheck Spec
 	// Build the CronJob based on HealthCheck Spec
 	cronJob := &batchv1.CronJob{
@@ -119,21 +142,22 @@ func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 									Args: []string{
 										"curl",
 										"--location",
-										"` + healthCheck.Spec.URI + `", // Update with your API endpoint
+										"http://" + healthCheck.Spec.URI + ".consumer.svc.cluster.local/api/v1/kafka/publish",
 										"--header",
 										"Content-Type: application/json",
 										"--data",
-										`{
-										"name": "` + healthCheck.Spec.Name + `",
-										"uri": "` + healthCheck.Spec.URI + `",
-										"is_paused": ` + strconv.FormatBool(healthCheck.Spec.IsPaused) + `,
-										"num_retries": ` + strconv.Itoa(int(healthCheck.Spec.NumRetries)) + `,
-										"uptime_sla": ` + strconv.Itoa(int(healthCheck.Spec.UptimeSLA)) + `,
-										"response_time_sla": ` + strconv.Itoa(int(healthCheck.Spec.ResponseTimeSLA)) + `,
-										"use_ssl": ` + strconv.FormatBool(healthCheck.Spec.UseSSL) + `,
-										"response_status_code": ` + strconv.Itoa(int(healthCheck.Spec.ResponseStatusCode)) + `,
-										"check_interval_in_seconds": ` + strconv.Itoa(int(healthCheck.Spec.CheckIntervalInSeconds)) + `
-										}`,
+										jsonString,
+										// `{
+										// 	"name": "` + healthCheck.Spec.Name + `",
+										// 	"uri": "http://" + healthCheck.Spec.URI + ".consumer.svc.cluster.local/api/v1/kafka/publish"
+										// 	"is_paused": ` + strconv.FormatBool(healthCheck.Spec.IsPaused) + `,
+										// 	"num_retries": ` + strconv.Itoa(int(healthCheck.Spec.NumRetries)) + `,
+										// 	"uptime_sla": ` + strconv.Itoa(int(healthCheck.Spec.UptimeSLA)) + `,
+										// 	"response_time_sla": ` + strconv.Itoa(int(healthCheck.Spec.ResponseTimeSLA)) + `,
+										// 	"use_ssl": ` + strconv.FormatBool(healthCheck.Spec.UseSSL) + `,
+										// 	"response_status_code": ` + strconv.Itoa(int(healthCheck.Spec.ResponseStatusCode)) + `,
+										// 	"check_interval_in_seconds": ` + strconv.Itoa(int(healthCheck.Spec.CheckIntervalInSeconds)) + `
+										// }`,
 									},
 								},
 							},
