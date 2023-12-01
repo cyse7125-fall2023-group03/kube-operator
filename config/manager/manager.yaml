@@ -70,7 +70,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: quay.io/csye7125group3/controller:latest
+        image: controller:latest
         imagePullPolicy: Always
         name: manager
         securityContext:
@@ -102,4 +102,4 @@ spec:
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
-        - name: ctrl-oper-system
+        - name: oper-ctrl-oper-system
