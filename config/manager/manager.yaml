@@ -71,6 +71,7 @@ spec:
         args:
         - --leader-elect
         image: quay.io/csye7125group3/controller:latest
+        imagePullPolicy: Always
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
