@@ -1,4 +1,13 @@
 apiVersion: v1
+kind: default
+metadata:
+  name: pull-secret-oper-system
+  namespace: system
+data:
+  .dockerconfigjson: ewogICJhdXRocyI6IHsKICAgICJxdWF5LmlvIjogewogICAgICAiYXV0aCI6ICJjR0YyWVc1bllXNWxjMmgyWVhOaE9teFZVMjQ1VkU1dmVsaExZMmRPUldWNFRsa3JXbU5EVTJaeGFYRjBVMmc0ZVVsUlNrcHlWbEJaUmxaSWRraGpkVVkxV1UxTk9USjJTME5OTmxWb2JFcz0iLAogICAgICAiZW1haWwiOiAiIgogICAgfQogIH0KfQ==
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
 kind: Namespace
 metadata:
   labels:
@@ -101,4 +110,4 @@ spec:
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
-        - name: {{ .Release.Name }}-pull-secret-oper-system
+        - name: pull-secret-oper-system
