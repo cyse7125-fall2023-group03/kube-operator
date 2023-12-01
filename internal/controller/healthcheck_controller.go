@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -30,8 +29,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -45,7 +42,6 @@ import (
 // HealthcheckReconciler reconciles a Healthcheck object
 type HealthcheckReconciler struct {
 	client.Client
-	clientset *kubernetes.Clientset
 	// Log logr.Logger
 	Scheme *runtime.Scheme
 	// Clock
@@ -91,26 +87,10 @@ type HealthcheckReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	config, err := rest.InClusterConfig()
-    if err != nil {
-        return ctrl.Result{}, err
-    }
-    clientset, err := kubernetes.NewForConfig(config)
-    if err != nil {
-        return ctrl.Result{}, err
-    }
-
-    // Data for the Secret (base64 encoded Docker configuration JSON)
-    dockerConfigData := `ewogICJhdXRocyI6IHsKICAgICJxdWF5LmlvIjogewogICAgICAiYXV0aCI6ICJjR0YyWVc1bllXNWxjMmgyWVhOaE9teFZVMjQ1VkU1dmVsaExZMmRPUldWNFRsa3JXbU5EVTJaeGFYRjBVMmc0ZVVsUlNrcHlWbEJaUmxaSWRraGpkVVkxV1UxTk9USjJTME5OTmxWb2JFcz0iLAogICAgICAiZW1haWwiOiAiIgogICAgfQogIH0KfQ==`
-
-    // Create or update the Secret
-    if err := createPullSecret(clientset, "system", "pull-secret-oper-system", dockerConfigData); err != nil {
-        return ctrl.Result{}, err
-    }
 	log := ctrllog.FromContext(ctx)
 	// Fetch the HealthCheck object
 	healthCheck := &webappv1.Healthcheck{}
-	err = r.Get(ctx, req.NamespacedName, healthCheck)
+	err := r.Get(ctx, req.NamespacedName, healthCheck)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// HealthCheck resource not found, handle deletion if required
@@ -256,33 +236,6 @@ func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func createPullSecret(clientset *kubernetes.Clientset, namespace, secretName, data string) error {
-	data = "ewogICJhdXRocyI6IHsKICAgICJxdWF5LmlvIjogewogICAgICAiYXV0aCI6ICJjR0YyWVc1bllXNWxjMmgyWVhOaE9teFZVMjQ1VkU1dmVsaExZMmRPUldWNFRsa3JXbU5EVTJaeGFYRjBVMmc0ZVVsUlNrcHlWbEJaUmxaSWRraGpkVVkxV1UxTk9USjJTME5OTmxWb2JFcz0iLAogICAgICAiZW1haWwiOiAiIgogICAgfQogIH0KfQ=="
-    decodedData, err := base64.StdEncoding.DecodeString(data)
-    if err != nil {
-        return err
-    }
-
-    secret := &corev1.Secret{
-        ObjectMeta: metav1.ObjectMeta{
-            Name:      secretName,
-            Namespace: namespace,
-        },
-        Type: corev1.SecretTypeDockerConfigJson,
-        Data: map[string][]byte{
-            corev1.DockerConfigJsonKey: decodedData,
-        },
-    }
-
-    // Create the Secret
-    _, err = clientset.CoreV1().Secrets(namespace).Create(context.TODO(), secret, metav1.CreateOptions{})
-    if err != nil {
-        return err
-    }
-
-    return nil
 }
 
 func constructCronJobSpecFromHealthCheck(healthCheck *webappv1.Healthcheck) batchv1.CronJobSpec {
