@@ -28,7 +28,10 @@ pipeline {
                 script {
                       def latestVersion = sh(returnStdout: true, script: "git describe --tags --abbrev=0").trim()
                       sh "docker login -u $QUAY_IO_USERNAME -p $QUAY_IO_PASSWORD ${env.QUAY_IO_REGISTRY}"
-                      sh "make docker-build docker-push IMG=quay.io/csye7125group3/controller:$latestVersion"
+                      sh "make docker-build IMG=quay.io/csye7125group3/controller:$latestVersion"
+                      sh "make docker-push IMG=quay.io/csye7125group3/controller:$latestVersion"
+                      sh "make docker-build IMG=quay.io/csye7125group3/controller:latest"
+                      sh "make docker-push IMG=quay.io/csye7125group3/controller:latest"
                       sh "make docker-build docker-push IMG=quay.io/csye7125group3/controller:latest"
                     }
                 }
