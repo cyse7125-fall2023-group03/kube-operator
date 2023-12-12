@@ -101,5 +101,3 @@ spec:
             memory: 64Mi
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
-      imagePullSecrets:
-        - name: oper-ctrl-oper-system
