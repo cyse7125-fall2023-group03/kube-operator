@@ -147,7 +147,7 @@ func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 									Args: []string{
 										"curl",
 										"--location",
-										"http://" + healthCheck.Spec.URI + ".consumer.svc.cluster.local/api/v1/kafka/publish",
+										"http://webapp-kafka-lb-service.consumer.svc.cluster.local/api/v1/kafka/publish",
 										"--header",
 										"Content-Type: application/json",
 										"--data",
@@ -253,7 +253,7 @@ func constructCronJobSpecFromHealthCheck(healthCheck *webappv1.Healthcheck) batc
 								Args: []string{
 									"curl",
 									"--location",
-									"http://localhost:8082/api/v1/kafka/publish", // Update with your API endpoint
+									"http://" + healthCheck.Spec.URI + ".consumer.svc.cluster.local/api/v1/kafka/publish",
 									"--header",
 									"Content-Type: application/json",
 									"--data",

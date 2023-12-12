@@ -1,6 +1,15 @@
 resources:
 - manager.yaml
 - secret.yaml
+
+patches:
+- patch: |-
+    - op: add
+      path: /spec/template/spec/imagePullSecrets
+      value: [{ name: oper-ctrl-secret-oper }]
+  target:
+    kind: Deployment
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
