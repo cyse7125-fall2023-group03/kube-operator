@@ -141,6 +141,13 @@ func (r *HealthcheckReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			JobTemplate: batchv1.JobTemplateSpec{ // Create a JobTemplateSpec
 				Spec: batchv1.JobSpec{
 					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Annotations: map[string]string{
+								"proxy.istio.io/config": `{
+										"holdApplicationUntilProxyStarts": true
+								}`,
+							},
+						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{
 								{
